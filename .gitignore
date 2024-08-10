@@ -1,0 +1,35 @@
+
+# Python bytecode
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Virtual environment
+venv/
+.env/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Test data
+.coverage
+nosetests.xml
+test_*.xml
+*.log
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Python environment
+Pipfile.lock
+
+**/logs/*
+/inbund/bundle_template_test
