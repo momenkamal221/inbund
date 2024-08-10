@@ -27,7 +27,6 @@ def get_package_manager():
     # If none of the package managers are found, return None
     return None
 
-def execute_command(cmd):
+def execute_command(cmd, capture_output=True):
     return subprocess.run(
-        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
+        cmd, shell=True, text=True, capture_output=capture_output)

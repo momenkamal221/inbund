@@ -11,7 +11,11 @@ class Pkgmgr(ABC):
         pass
     
     @abstractmethod
-    def install(package):
+    def install(package, capture_output=True):
+        pass
+    
+    @abstractmethod
+    def remove(package, capture_output=True):
         pass
     
     @abstractmethod
@@ -29,8 +33,4 @@ class Pkgmgr(ABC):
     
     @abstractmethod
     def database_update() :
-        pass
-    
-    @abstractmethod
-    def remove(package):
         pass

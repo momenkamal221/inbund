@@ -15,10 +15,10 @@ class dnf(Pkgmgr):
         if is_available.returncode == 0:
             return True
         return False
-    def install(package):
+    def install(package, capture_output=True):
         # Install the package
         install_cmd = f"dnf install -y {package}"
-        install_result = execute_command(install_cmd)
+        install_result = execute_command(install_cmd, capture_output)
         if install_result.returncode == 0:
             return True
         return False
@@ -43,10 +43,10 @@ class dnf(Pkgmgr):
         #check-update returncode is the number the available updates
         return database_update.returncode
     
-    def remove(package):
+    def remove(package, capture_output=True):
         # Install the package
         remove_cmd = f"dnf remove -y {package}"
-        remove_result = execute_command(remove_cmd)
+        remove_result = execute_command(remove_cmd, capture_output)
         if remove_result.returncode == 0:
             return True
         return False

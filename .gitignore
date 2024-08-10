@@ -31,5 +31,4 @@ test_*.xml
 # Python environment
 Pipfile.lock
 
-**/logs/*
 /inbund/bundle_template_test

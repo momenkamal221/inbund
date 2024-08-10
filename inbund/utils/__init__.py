@@ -6,9 +6,9 @@ logger=Log()
 commandPrefix=">>>"
 
 
-def execute_command(cmd):
+def execute_command(cmd, capture_output=True):
     return subprocess.run(
-        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        cmd, shell=True, text=True, capture_output=capture_output)
 
 
 
@@ -67,11 +67,11 @@ def run_command(cmd:str):
     else:
         logger.log("cmd",f"{cmd}: Failed to execute.",logger.MessageLevel.ERROR,log_to_file=True)
         
-        if out_on_error:print(executed_command.stderr.decode('utf-8'))
+        if out_on_error:print(executed_command.stderr)
         
         run_time=datetime.now().strftime('%y.%m.%d-%H:%M:%S.%f')
         with open(f"{logger.log_dir}/cmd-{run_time}", "a") as command_out_file:
-            command_out_file.write(f"{commandPrefix} {cmd}\n{executed_command.stderr.decode('utf-8')}")
+            command_out_file.write(f"{commandPrefix} {cmd}\n{executed_command.stderr}")
 
 
 
@@ -121,7 +121,7 @@ def flatpak_install(*apps_id):
         remote = splited_app_id[1]
         
         #check if the app is installed
-        if execute_command(f"flatpak list --columns=application | grep {app_id}").stdout.decode('utf-8').strip()==app_id:
+        if execute_command(f"flatpak list --columns=application | grep {app_id}").stdout.strip()==app_id:
             logger.log(task_name,f"{app_id}: Already installed.",logger.MessageLevel.SUCCESS,log_to_file=True)
             continue
         
@@ -146,11 +146,11 @@ def flatpak_install(*apps_id):
             logger.log(task_name,f"{app_id}: Successfully installed.",logger.MessageLevel.SUCCESS,log_to_file=True)
         else:
             logger.log(task_name,f"{app_id}: Failed to install.",logger.MessageLevel.ERROR,log_to_file=True)
-            print(executed_command.stderr.decode('utf-8'))
+            print(executed_command.stderr)
 
 
 def flatpak_get_remotes(appID):
-    return execute_command(f"flatpak search {appID} --columns=remotes | awk \'{{print $NF}}\'").stdout.decode('utf-8').strip().split(",")
+    return execute_command(f"flatpak search {appID} --columns=remotes | awk \'{{print $NF}}\'").stdout.strip().split(",")
 
 
 def choose_option(options):
@@ -168,4 +168,3 @@ def choose_option(options):
                 print("Invalid choice, please try again.")
         except ValueError:
             print("Invalid input, please enter a number.")
- 

@@ -8,6 +8,7 @@ from .utils import (
     logger
 )
 from datetime import datetime
+from inbund.pkgmgr import current_pkgmgr
 
 def unpack(bundle_path):
     
@@ -23,7 +24,7 @@ def unpack(bundle_path):
     logger.log_file_path = f"{log_dir}/{run_time}.log"
 
     # import_module(f"{bundle_path}/init.py")
-    flatpak_install("it.mijorus.smiledasdasd")
+    # flatpak_install(">>> dnf install discord")
     # import_module(f"{bundle_path}/final.py")
     
     
