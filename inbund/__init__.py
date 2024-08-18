@@ -1,14 +1,17 @@
 import os
-from . import utils
 from .utils import (
     import_module,
-    install_packages,
-    flatpak_install,
     get_names,
     logger
 )
+
+from .core import (
+    install_packages,
+    flatpak_install,
+    remove_packages
+)
 from datetime import datetime
-from inbund.pkgmgr import current_pkgmgr
+
 
 def unpack(bundle_path):
     
@@ -24,7 +27,7 @@ def unpack(bundle_path):
     logger.log_file_path = f"{log_dir}/{run_time}.log"
 
     # import_module(f"{bundle_path}/init.py")
-    # flatpak_install(">>> dnf install discord")
+    install_packages("vlc")
     # import_module(f"{bundle_path}/final.py")
     
     
