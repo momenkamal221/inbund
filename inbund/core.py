@@ -130,3 +130,19 @@ def flatpak_install(*apps_id):
         else:
             logger.log(task_name,f"{app_id}: Failed to install.",logger.MessageLevel.ERROR,log_to_file=True)
             print(executed_command.stderr)
+
+
+
+def update_system():
+    task_name="Update"
+    is_updated=logger.loading(
+        task_name,
+        f"System update",
+        logger.MessageLevel.IN_PROGRESS,
+        lambda: current_pkgmgr.update()
+        )
+    
+    if is_updated:
+        logger.log(task_name,f"Update completed successfully",logger.MessageLevel.SUCCESS,log_to_file=True)
+    else:
+        logger.log(task_name,f"failed to update.",logger.MessageLevel.ERROR,log_to_file=True)

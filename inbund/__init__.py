@@ -8,7 +8,8 @@ from .utils import (
 from .core import (
     install_packages,
     flatpak_install,
-    remove_packages
+    remove_packages,
+    update_system
 )
 from datetime import datetime
 
@@ -26,8 +27,10 @@ def unpack(bundle_path):
     logger.log_dir = log_dir
     logger.log_file_path = f"{log_dir}/{run_time}.log"
 
+    update_system()
+    
     # import_module(f"{bundle_path}/init.py")
-    install_packages("vlc")
+    # install_packages("vlc")
     # import_module(f"{bundle_path}/final.py")
     
     
