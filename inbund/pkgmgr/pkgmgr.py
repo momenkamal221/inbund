@@ -19,9 +19,7 @@ class Pkgmgr(ABC):
         pass
     
     @abstractmethod
-    def check_update():
-        pass
-    
+
     @abstractmethod
     def update():
         pass
@@ -33,4 +31,8 @@ class Pkgmgr(ABC):
     
     @abstractmethod
     def database_update() :
+        pass
+    
+    @abstractmethod
+    def get_name():
         pass

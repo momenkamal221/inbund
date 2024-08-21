@@ -146,3 +146,22 @@ def update_system():
         logger.log(task_name,f"Update completed successfully",logger.MessageLevel.SUCCESS,log_to_file=True)
     else:
         logger.log(task_name,f"failed to update.",logger.MessageLevel.ERROR,log_to_file=True)
+       
+    return is_updated
+
+def refresh_pkgmgr():
+    """basically removes cache and update database
+    """
+    
+    task_name="Update"
+    def refresh():
+        current_pkgmgr.clear_cache()
+        return current_pkgmgr.database_update()
+        
+    updates_number=logger.loading(
+        task_name,
+        f"refreshing {current_pkgmgr.get_name()}" ,
+        logger.MessageLevel.IN_PROGRESS,
+        refresh
+        )
+    logger.log(task_name,f"Found {updates_number} available updates",logger.MessageLevel.INFO,log_to_file=True)

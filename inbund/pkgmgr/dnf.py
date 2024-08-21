@@ -22,11 +22,7 @@ class dnf(Pkgmgr):
         if install_result.returncode == 0:
             return True
         return False
-    def check_update():
-        check_update_cmd = f"dnf check-update"
-        check_update = execute_command(check_update_cmd)
-        #check-update returncode is the number the available updates
-        return check_update.returncode
+
     def update():
         update_cmd = f"dnf update -y"
         update = execute_command(update_cmd)
@@ -38,7 +34,7 @@ class dnf(Pkgmgr):
         execute_command(cmd)
         
     def database_update():
-        database_update_cmd = f"dnf makecache --refresh"
+        database_update_cmd = f"dnf check-update"
         database_update = execute_command(database_update_cmd)
         #check-update returncode is the number the available updates
         return database_update.returncode
@@ -50,6 +46,8 @@ class dnf(Pkgmgr):
         if remove_result.returncode == 0:
             return True
         return False
+    def get_name():
+        return "dnf"
     
 
 
