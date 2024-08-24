@@ -1,10 +1,8 @@
 import subprocess
+from inbund import bucket
 from .log import Log
-
 logger=Log()
-commandPrefix=">>>"
-
-
+bucket.logger=logger
 def execute_command(cmd, capture_output=True):
     return subprocess.run(
         cmd, shell=True, text=True, capture_output=capture_output)
@@ -35,7 +33,7 @@ def get_names(file_path:str) -> list:
                 if not line.strip().startswith('#'):
                     # Remove comments at the end of the line
                     line_without_comment = line.split('#')[0].strip()
-                    if line.startswith(commandPrefix):
+                    if line.startswith(bucket.commandPrefix):
                         result.append(line_without_comment)
                         continue
                     # Split the line based on spaces and tabs

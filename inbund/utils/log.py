@@ -1,4 +1,5 @@
 import sys
+import os
 import time
 import threading
 from datetime import datetime
@@ -39,7 +40,8 @@ class Log:
         DEBUG="DEBUG"
     
     def __init__(self,log_file_path="") -> None:
-        self.log_file_path=log_file_path
+        if not log_file_path.strip() == "":
+            self.log_file_path=self.set_log_file(log_file_path)
         self.logs=[]
         self.log_dir=""
 
@@ -51,7 +53,17 @@ class Log:
             log_file.write(strLog + "\n")
         
         
-        
+    def set_log_file(self,log_file_path):
+        print(log_file_path)
+        if not os.path.exists(log_file_path):
+            # Get the directory name from the file path
+            directory = os.path.dirname(log_file_path)
+            # Create parent directories if they don't exist
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+
+        self.log_file_path=log_file_path
+    
         
     def make_log_message(task_name, message, message_level=MessageLevel.INFO):
         if message_level.upper() == Log.MessageLevel.ERROR:

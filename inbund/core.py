@@ -5,10 +5,12 @@ from datetime import datetime
 from inbund.pkgmgr import current_pkgmgr
 from .utils import (
     execute_command,
-    logger,
     choose_option,
-    commandPrefix
+    logger
     )
+from inbund import bucket
+from inbund.bucket import commandPrefix
+
 
 
 
@@ -30,8 +32,9 @@ def run_command(cmd:str):
         if out_on_error:print(executed_command.stderr)
         
         run_time=datetime.now().strftime('%y.%m.%d-%H:%M:%S.%f')
-        with open(f"{logger.log_dir}/cmd-{run_time}", "a") as command_out_file:
-            command_out_file.write(f"{commandPrefix} {cmd}\n{executed_command.stderr}")
+        if bucket.current_bundle != None:
+            with open(f"{bucket.current_bundle.log_dir}/cmd-{run_time}", "a") as command_out_file:
+                command_out_file.write(f"{commandPrefix} {cmd}\n{executed_command.stderr}")
 
 
 
@@ -146,8 +149,10 @@ def update_system():
         logger.log(task_name,f"Update completed successfully",logger.MessageLevel.SUCCESS,log_to_file=True)
     else:
         logger.log(task_name,f"failed to update.",logger.MessageLevel.ERROR,log_to_file=True)
-       
+    
     return is_updated
+
+
 
 def refresh_pkgmgr():
     """basically removes cache and update database
@@ -165,3 +170,4 @@ def refresh_pkgmgr():
         refresh
         )
     logger.log(task_name,f"Found {updates_number} available updates",logger.MessageLevel.INFO,log_to_file=True)
+    
