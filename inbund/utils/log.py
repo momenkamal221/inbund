@@ -115,10 +115,13 @@ class Log:
         self.logs.pop()
         
     def loading(self,task_name, message,message_level=MessageLevel.INFO,background_task=lambda:None,*args, **kwargs):
-        """will make loading dots after the given log
-        Note: this function will remove the log message after is being finished, it's up to you if you want to log the task result or not
+        """will make loading dots while the background_task is being executed
+        Note: 
+        - this function will remove the log message after is being finished
+        - it's not preferred to print inside the background_task store the result then print it again using the return value
+        - it's up to you if you want to log the task result or not
         Args:
-            background_task (function): once this task is finished will
+            background_task: is a function that contains the logic to execute
         """
         return_value=None
         

@@ -6,13 +6,15 @@ from inbund.pkgmgr import current_pkgmgr
 from .utils import (
     execute_command,
     choose_option,
-    logger
+    logger,
+    get_storage_file
     )
 from inbund import bucket
-from inbund.bucket import commandPrefix
+from inbund.bucket import commandPrefix, STORAGE_DIRS
 
-
-
+import re
+import shutil
+import os
 
 def run_command(cmd:str):
     out_on_error = cmd.endswith("2>")
@@ -171,3 +173,55 @@ def refresh_pkgmgr():
         )
     logger.log(task_name,f"Found {updates_number} available updates",logger.MessageLevel.INFO,log_to_file=True)
     
+
+def copy_files(*prompts):
+
+    task_name = "Copy"
+    pattern = r"^'(.+)'\s*(|r)(-|--)>\s*'(.+)'$"
+    
+    for prompt in prompts:
+        if prompt['line'].startswith(commandPrefix):
+            cmd = prompt['line'][len(commandPrefix):]
+            run_command(cmd)
+            continue
+        match = re.match(pattern, prompt['line'])
+        if not match:
+            logger.log(task_name,f"Line {prompt['n']}: Syntax is not correct -> {prompt['line']}",logger.MessageLevel.ERROR,log_to_file=True)
+            continue
+        file_name = match.group(1).strip()  # Extract and trim the src path
+        location, src = get_storage_file(STORAGE_DIRS.files.value,file_name)
+        if not src: #if empty
+            logger.log(task_name,f"{file_name} is not found",logger.MessageLevel.ERROR,log_to_file=True)
+            continue
+        dst = match.group(4).strip()
+        allow_overwrite=match.group(3) == "-"
+        allow_recursive=match.group(2) != "r"
+        try:
+            # Copy the file from src to dst
+            if not allow_overwrite and os.path.exists(f"{dst}/{file_name}"):
+                response = input(f"Over write the file \"{dst}/{file_name}\" (y/n): ").strip().lower()
+                if response == "n" or not response == "":
+                    logger.log(task_name,f"Will not overwrite \"{dst}/{file_name}\"",logger.MessageLevel.WARNING,log_to_file=True)
+                    continue
+            if not allow_recursive and not os.path.exists(dst):
+                response = input(f"The directory \"{dst}/\" is not exists... create the path? (y/n): ").strip().lower()
+                if response == "n" or not response == "":
+                    logger.log(task_name,f"Will not create the path \"{dst}\"",logger.MessageLevel.WARNING,log_to_file=True)
+                    continue
+                
+            try: os.makedirs(dst, exist_ok=True)
+            except:pass
+            
+            logger.loading(
+                task_name,
+                f"Coping {file_name} to {dst}" ,
+                logger.MessageLevel.IN_PROGRESS,
+                lambda:shutil.copy(src, os.path.expanduser(dst))
+            )
+            logger.log(task_name,f"{location} - {prompt['line']}",logger.MessageLevel.SUCCESS,log_to_file=True)
+        except FileNotFoundError:
+            logger.log(task_name,f"{file_name} is not found!",logger.MessageLevel.ERROR,log_to_file=True)
+        except PermissionError:
+            logger.log(task_name,f"No permission granted",logger.MessageLevel.ERROR,log_to_file=True)
+        except Exception as e:
+            logger.log(task_name,f"An unexpected error occurred: {e}",logger.MessageLevel.ERROR,log_to_file=True)

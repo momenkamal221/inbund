@@ -5,10 +5,12 @@ from .core import (
     flatpak_install,
     remove_packages,
     update_system,
-    refresh_pkgmgr
+    refresh_pkgmgr,
+    copy_files
 )
 from .utils import (
-    import_module
+    import_module,
+    get_lines
 )
 
 class Bundle:
@@ -32,6 +34,7 @@ class Bundle:
     
     def unpack(self):
         path = self.path
+        
         import_module(f"{path}/init.py")
-        install_packages("vlc")
+        copy_files(*get_lines("/home/momen/projects/inbund/inbund/.config/inbund_test/bundles/bundle_template/definers/files"))
         import_module(f"{path}/final.py")

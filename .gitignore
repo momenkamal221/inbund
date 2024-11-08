@@ -30,5 +30,5 @@ test_*.xml
 
 # Python environment
 Pipfile.lock
-
+/inbund/.config/inbund_test
 /inbund/bundle_template_test
