@@ -1,7 +1,14 @@
+import os
+import shutil
 from setuptools import setup, find_packages
 
 with open('README.md', 'r') as f:
     long_description = f.read()
+shutil.copyfile('./inbund/cli/inbund', '/usr/bin/inbund')
+shutil.copyfile('./inbund/cli/inbund', '/bin/inbund')
+os.chmod('/usr/bin/inbund', 0o755)
+os.chmod('/bin/inbund', 0o755)
+
 
 setup(
     name='inbund',
