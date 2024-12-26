@@ -100,7 +100,7 @@ if len(bundles_found)!=len(args.bundles) :
 if not args.tmux: args.terminal=True
 if args.tmux:
     tmux_server = f"1-{datetime.now().strftime('%y.%m.%d-%H:%M:%S.%f')}"
-    cmd = f"(sleep 0.5; tmux -L {tmux_server} send-keys \"python \'\\'{inbund_package_dir}/main_tmux\'\\' -L {tmux_server} -c {bundles_dir} {" ".join(args.bundles)}\" C-m) &"
+    cmd = f"(sleep 0.5; tmux -L {tmux_server} send-keys \"python '{inbund_package_dir}/main_tmux' -L {tmux_server} -c {bundles_dir} {" ".join(args.bundles)}\" C-m) &"
     subprocess.run(
         cmd, shell=True, text=True,)
     tmux_cmd = f"tmux -L {tmux_server}"

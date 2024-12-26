@@ -31,8 +31,8 @@ def execute_command_tmux(cmd, capture_output=True):
     return executed_command
 
  
-def execute_command(cmd, capture_output=True):
-    if bucket.tmux_flag:
+def execute_command(cmd, capture_output=True,tmux_disabled=True):
+    if bucket.tmux_flag and not tmux_disabled:
         return execute_command_tmux(cmd,capture_output)
     else:
         return subprocess.run(

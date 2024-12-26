@@ -25,7 +25,7 @@ def run_command(cmd:str):
         task_name,
         f"Executing the command: {cmd}",
         logger.MessageLevel.IN_PROGRESS,
-        lambda: execute_command(cmd)
+        lambda: execute_command(cmd,tmux_disabled=False)
     )
 
     if executed_command.returncode==0:
@@ -149,7 +149,6 @@ def flatpak_install(*apps_id):
         # Run the Flatpak install command
         app_id =  splitted_app_id[0]
         remote = splitted_app_id[1]
-        
         #check if the app is installed
         if execute_command(f"flatpak list --columns=application | grep {app_id}").stdout.strip()==app_id:
             logger.log(task_name,f"{app_id}: Already installed.",logger.MessageLevel.SUCCESS,log_to_file=True)
