@@ -1,4 +1,8 @@
 import subprocess
+from datetime import datetime
+from pathlib import Path
+import pickle
+
 from inbund import bucket
 from .log import Log
 import os
@@ -6,15 +10,45 @@ logger=Log()
 bucket.logger=logger
 
 
+def execute_command_tmux(cmd, capture_output=True):
+    current_dir = Path(__file__).resolve().parent
+    temp_file_path=f"{current_dir}/{datetime.now().strftime('%y.%m.%d-%H:%M:%S.%f')}"
+    open(temp_file_path, 'w')
+    tmux_cmd=f"tmux -L {bucket.tmux_server} split-window -v -p 50 bash -c 'python {current_dir}/exec-command.py {temp_file_path} {cmd}' && tmux swap-pane -U"
+    executed_command = subprocess.run(
+            tmux_cmd, shell=True,text=True,capture_output=capture_output)
+    while True:
+        if not os.path.exists(temp_file_path):
+            break
+    with open(f'{temp_file_path}.done', 'rb') as file:
+        result_data = pickle.load(file)
+        
+    executed_command.returncode = result_data['returncode']
+    executed_command.stdout = result_data['stdout']
+    executed_command.stderr = result_data['stderr']
+    executed_command.args = result_data['args']
+    os.remove(f'{temp_file_path}.done')
+    return executed_command
 
+ 
 def execute_command(cmd, capture_output=True):
-    return subprocess.run(
-        cmd, shell=True, text=True, capture_output=capture_output)
+    if bucket.tmux_flag:
+        return execute_command_tmux(cmd,capture_output)
+    else:
+        return subprocess.run(
+            cmd, shell=True, text=True, capture_output=capture_output)
 
 def run_bash_script(bash_script_path):
-    subprocess.run(['bash', bash_script_path])
+    if bucket.tmux_flag:
+        return execute_command_tmux(f"bash {bash_script_path}",True)
+    else:
+        return subprocess.run(
+            f"bash {bash_script_path}", shell=True, text=True)
+
+
 
 def import_module(module_path):
+    
     import importlib.util
     spec = importlib.util.spec_from_file_location('module', module_path)
     module = importlib.util.module_from_spec(spec)
@@ -123,7 +157,6 @@ def get_storage_file(storage_dir:str, file:str) -> tuple:
     exists_in_external, file_path_external = file_in_external(storage_dir, file)
     if exists_in_external:
         return ("external", file_path_external)
-
     return ("","")
 
     

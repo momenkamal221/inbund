@@ -4,19 +4,17 @@ with open('README.md', 'r') as f:
     long_description = f.read()
 
 setup(
-    name='my_library',
+    name='inbund',
     version='1.0.0',
     author='Your Name',
-    author_email='your@email.com',
+    author_email='',
     description='A short description of your library',
     long_description=long_description,
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     url='https://github.com/yourusername/my_library',
-    packages=find_packages(),
-    classifiers=[
-        'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
-    ],
-    python_requires='>=3.6',
+    package_data={
+        '': ['cli/*','main*'],
+    },
+    packages=find_packages(exclude=['tests']),  # This will find packages within the 'inbund' directory
+    include_package_data=True,
 )

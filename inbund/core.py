@@ -1,35 +1,37 @@
 """contains the core install script
 """
 from datetime import datetime
-
+import time
+import re
+import shutil
+import os
 from inbund.pkgmgr import current_pkgmgr
 from .utils import (
     execute_command,
     choose_option,
     logger,
-    get_storage_file
+    get_storage_file,
+    run_bash_script
     )
 from inbund import bucket
 from inbund.bucket import commandPrefix, STORAGE_DIRS
 
-import re
-import shutil
-import os
 
 def run_command(cmd:str):
     out_on_error = cmd.endswith("2>")
     if out_on_error: cmd=cmd[:-2]
-    
+    task_name="cmd"
     executed_command=logger.loading(
-        "cmd",
+        task_name,
         f"Executing the command: {cmd}",
         logger.MessageLevel.IN_PROGRESS,
         lambda: execute_command(cmd)
     )
+
     if executed_command.returncode==0:
-        logger.log("cmd",f"{cmd}: Executed successfully.",logger.MessageLevel.SUCCESS,log_to_file=True)
+        logger.log(task_name,f"{cmd}: Executed successfully.",logger.MessageLevel.SUCCESS,log_to_file=True)
     else:
-        logger.log("cmd",f"{cmd}: Failed to execute.",logger.MessageLevel.ERROR,log_to_file=True)
+        logger.log(task_name,f"{cmd}: Failed to execute.",logger.MessageLevel.ERROR,log_to_file=True)
         
         if out_on_error:print(executed_command.stderr)
         
@@ -39,6 +41,40 @@ def run_command(cmd:str):
                 command_out_file.write(f"{commandPrefix} {cmd}\n{executed_command.stderr}")
 
 
+
+def run_scripts(*scripts):
+    task_name="Bash"
+    
+    for script_name in scripts:
+        sh_file=False
+        location, src = get_storage_file(STORAGE_DIRS.scripts.value,f"{script_name}.sh")
+        if src:
+            sh_file=True
+        if not sh_file:
+            location, src = get_storage_file(STORAGE_DIRS.scripts.value,f"{script_name}")            
+        if not src:
+            logger.log(task_name,f"Script has run:  {script_name} is not found",logger.MessageLevel.ERROR,log_to_file=True)
+            continue
+        
+        if bucket.tmux_flag:
+            logger.loading(
+                task_name,
+                f"Running the script: {location} - {script_name}",
+                logger.MessageLevel.IN_PROGRESS,
+                lambda:run_bash_script(src)
+            )
+            logger.log(task_name,f"Script has run: {location} - {script_name}",logger.MessageLevel.SUCCESS,log_to_file=True)
+        
+        else:
+            logger.log(
+                task_name,
+                f"Running the script: {location} - {script_name}",
+                logger.MessageLevel.IN_PROGRESS,
+                log_to_file=True
+            )
+            run_bash_script(src)
+            logger.log(task_name,f"Script has run: {location} - {script_name}",logger.MessageLevel.SUCCESS,log_to_file=True)
+        
 
 def remove_packages(*packages):
     task_name="Remove"
@@ -76,10 +112,16 @@ def install_packages(*packages):
             logger.log(task_name,f"{package}: Already installed.",logger.MessageLevel.SUCCESS,log_to_file=True)
             continue
         # Check if the package is available in dnf
-        if not current_pkgmgr.is_available(package):
+        is_pkg_available = logger.loading(
+            "Checking",
+            f"Checking if {package} is available",
+            logger.MessageLevel.IN_PROGRESS,
+            lambda: current_pkgmgr.is_available(package)
+        )
+        
+        if not is_pkg_available:
             logger.log(task_name,f"{package}: Is not available.",logger.MessageLevel.ERROR,log_to_file=True)
             continue
-        
         # Install the package
         is_package_installed = logger.loading(
             task_name,
@@ -216,7 +258,7 @@ def copy_files(*prompts):
                 task_name,
                 f"Coping {file_name} to {dst}" ,
                 logger.MessageLevel.IN_PROGRESS,
-                lambda:shutil.copy(src, os.path.expanduser(dst))
+                lambda:shutil.copy(src, os.path.abspath(os.path.expanduser(dst)))
             )
             logger.log(task_name,f"{location} - {prompt['line']}",logger.MessageLevel.SUCCESS,log_to_file=True)
         except FileNotFoundError:

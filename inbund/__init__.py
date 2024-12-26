@@ -2,9 +2,9 @@ from . import bundle
 from .utils import logger
 from inbund import bucket
 
-
 def unpack(*bundle_paths):
     for bundle_path in bundle_paths:
+        
         bundle = setup_new_bundle(bundle_path)
         bundle.unpack()
 

@@ -1,0 +1,6 @@
+exclude *.pyc
+exclude */tests/*
+exclude */__pycache__/*
+
+exclude inbund/pkgmgr/*
+exclude inbund/utils/*

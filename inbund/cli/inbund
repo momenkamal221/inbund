@@ -1,0 +1,115 @@
+#!/usr/bin/env python
+
+from datetime import datetime
+import subprocess
+import os
+import argparse
+import inbund
+
+# Add the path to your editable installation
+
+inbund_package_dir = os.path.dirname(inbund.__file__)
+
+parser= argparse.ArgumentParser(description="A script to demonstrate argparse usage.")
+
+group = parser.add_mutually_exclusive_group()
+
+parser.add_argument(
+    "bundles",
+    nargs="*",
+    help="List of bundles",
+)
+
+group.add_argument(
+    "-m", "--tmux", 
+    action="store_true", 
+    default=False,
+    help="Integrate tmux",
+    
+)
+
+group.add_argument(
+    "-t", "--terminal", 
+    action="store_true", 
+    default=False,
+    help="Integrate the terminal is used when running the script"
+)
+
+parser.add_argument(
+    "-l", "--list", 
+    action="store_true", 
+    default=False,
+    help="list bundles",
+)
+
+parser.add_argument(
+    "-c", "--inbund-dir", 
+    type=str,
+    default=os.path.expanduser((f"~{os.getenv('SUDO_USER')}" if os.getenv('SUDO_USER') else "~") + "/.config/inbund"), 
+    help="where inbund directory is located \'~/.config/inbund\' is the default"
+)
+args = parser.parse_args()
+
+
+if args.inbund_dir:
+    inbund_dir=args.inbund_dir
+else:
+    config_dir = os.path.join(os.path.expanduser("~"), ".config")
+    inbund_dir=f"{config_dir}/inbund"
+
+bundles_dir=f"{inbund_dir}/bundles"
+
+
+def get_dirs_except_underscore(parent_dir):
+    # List all items in the parent directory
+    all_items = os.listdir(parent_dir)
+    # Filter to include only directories that do not start with '_'
+    dirs = [
+        item for item in all_items
+        if os.path.isdir(os.path.join(parent_dir, item)) and not item.startswith('_')
+    ]
+    return dirs
+
+
+
+
+bundles_existed=get_dirs_except_underscore(bundles_dir)
+
+if args.list:
+    print("\n".join(bundles_existed))
+    exit()
+
+
+
+if os.geteuid() != 0:
+    print("This script requires sudo privileges.")
+    exit()
+
+#check if the all bundles exists
+
+bundles_found = [item for item in args.bundles if item in bundles_existed]
+if len(args.bundles)==0:
+    print("error no bundles provided")
+    exit(1)
+
+if len(bundles_found)!=len(args.bundles) :
+    print(f"error not exited bundles: {", ".join([item for item in args.bundles if item not in bundles_existed])}")
+    exit(1)
+
+
+if not args.tmux: args.terminal=True
+if args.tmux:
+    tmux_server = f"tmux_inbund-{datetime.now().strftime('%y.%m.%d-%H:%M:%S.%f')}"
+    cmd = f"(sleep 0.5; tmux -L {tmux_server} send-keys \"python \'\\'{inbund_package_dir}/main_tmux\'\\' -L {tmux_server} -c {bundles_dir} {" ".join(args.bundles)}\" C-m) &"
+    subprocess.run(
+        cmd, shell=True, text=True,)
+    tmux_cmd = f"tmux -L {tmux_server}"
+    subprocess.run(
+        tmux_cmd, shell=True, text=True,capture_output=True)
+elif args.terminal:
+    cmd = f"python '{inbund_package_dir}/main' -c {bundles_dir} {" ".join(args.bundles)}"
+    subprocess.run(
+        cmd, shell=True, text=True)
+
+
+

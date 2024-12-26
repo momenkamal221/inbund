@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+import subprocess
+import inbund
+from inbund.utils.log import Log
+from inbund.utils import execute_command
+from datetime import datetime
+from inbund import bucket
+import sys
+
+
+import argparse
+parser= argparse.ArgumentParser(exit_on_error=False)
+
+parser.add_argument(
+    "bundles",
+    nargs="*",
+    help="List of bundles",
+)
+
+parser.add_argument(
+    "-L", "--tmux-server", 
+    type=str
+)
+parser.add_argument(
+    "-c", "--inbund-dir", 
+    type=str,
+)
+
+args = parser.parse_args()
+
+for i in range(200):print()
+
+bucket.tmux_flag = True
+bucket.tmux_server= args.tmux_server
+
+for x in (args.bundles):
+    inbund.unpack(f"{args.inbund_dir}/{x}")
+
+subprocess.run(
+        f"while true; do echo -n \"Type 'done' to exit: \"; read user_input; [[ \"$user_input\" == \"done\" ]] && break; done"
+        , shell=True, text=True)
+subprocess.run(
+        f"tmux -L {args.tmux_server} kill-server"
+        , shell=True, text=True)

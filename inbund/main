@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+import inbund
+from inbund.utils.log import Log
+from inbund.utils import execute_command
+from datetime import datetime
+from inbund import bucket
+
+
+import argparse
+parser= argparse.ArgumentParser(exit_on_error=False)
+
+parser.add_argument(
+    "bundles",
+    nargs="*",
+    help="List of bundles",
+)
+parser.add_argument(
+    "-c", "--inbund-dir", 
+    type=str,
+)
+
+args = parser.parse_args()
+
+bucket.tmux_flag = False
+bucket.tmux_server= ""
+
+for x in (args.bundles):
+    inbund.unpack(f"{args.inbund_dir}/{x}")
