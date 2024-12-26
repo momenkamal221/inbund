@@ -1,2 +1,0 @@
-def momen():
-    return "momen"
